@@ -56,8 +56,8 @@ impl std::fmt::Debug for TdPyAny {
         let s: PyResult<String> = Python::with_gil(|py| {
             let self_ = self.bind(py);
             let binding = self_.repr()?;
-            let repr = binding.to_str()?;
-            Ok(String::from(repr))
+            let repr = binding.to_cow()?;
+            Ok(String::from(repr.as_ref()))
         });
         f.write_str(&s.map_err(|_| std::fmt::Error {})?)
     }

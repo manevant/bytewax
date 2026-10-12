@@ -70,7 +70,11 @@ impl Operator {
     }
 
     pub(crate) fn name(&self, py: Python) -> PyResult<String> {
-        Ok(self.0.bind(py).get_type().name()?.to_string())
+        if let Ok(name) = self.0.getattr(py, "core_name") {
+            Ok(name.extract(py)?)
+        } else {
+            Ok(self.0.bind(py).get_type().name()?.to_string())
+        }
     }
 
     pub(crate) fn step_id(&self, py: Python) -> PyResult<StepId> {
