@@ -107,8 +107,8 @@ impl Operator {
             .bind(py)
             .getattr(port_name)
             .reraise_with(|| format!("operator did not have MultiPort {port_name:?}"))?
-            .getattr("stream_ids")?
-            .extract::<&PyDict>()?;
-        stream_ids.values().extract()
+            .getattr("stream_ids")?;
+        let stream_ids_dict: Bound<'_, PyDict> = stream_ids.downcast_into()?;
+        stream_ids_dict.values().extract()
     }
 }

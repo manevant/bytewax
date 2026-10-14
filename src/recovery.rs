@@ -304,11 +304,21 @@ struct SerializedSnapshot(StepId, StateKey, SnapshotEpoch, Option<Vec<u8>>);
 ///
 /// :type backup_interval: typing.Optional[datetime.timedelta]
 #[pyclass(module = "bytewax.recovery")]
+
 pub(crate) struct RecoveryConfig {
     #[pyo3(get)]
     db_dir: PathBuf,
     #[pyo3(get)]
     backup_interval: BackupInterval,
+}
+
+impl Clone for RecoveryConfig {
+    fn clone(&self) -> Self {
+        Self {
+            db_dir: self.db_dir.clone(),
+            backup_interval: self.backup_interval,
+        }
+    }
 }
 
 #[pymethods]
@@ -337,7 +347,7 @@ impl RecoveryConfig {
         }
         for entry in fs::read_dir(self.db_dir.clone()).reraise("Error listing recovery DB dir")? {
             let path = entry.reraise("Error accessing recovery DB file")?.path();
-            if path.extension().map_or(false, |ext| *ext == *sqlite_ext) {
+            if path.extension().is_some_and(|ext| *ext == *sqlite_ext) {
                 let part =
                     RecoveryPart::open(py, &path).reraise("Error opening recovery DB file")?;
                 let mut part_loader = part.part_loader();
@@ -1371,8 +1381,7 @@ fn init_db_dir(py: Python, db_dir: PathBuf, count: PartitionCount) -> PyResult<(
     tracing::warn!("Creating {count:?} recovery partitions in {db_dir:?}");
     if !db_dir.is_dir() {
         return Err(PyFileNotFoundError::new_err(format!(
-            "recovery directory {:?} does not exist; please create it with `mkdir`",
-            db_dir
+            "recovery directory {db_dir:?} does not exist; please create it with `mkdir`"
         )));
     }
     for index in count.iter() {
@@ -1454,7 +1463,7 @@ where
                         let frontier = input_frontiers.simplify();
                         // EOF counts as progress. This will also filter
                         // out the flash of 0 epoch upon resume.
-                        let frontier_progressed = frontier.map_or(true, |f| f > *cap.time());
+                        let frontier_progressed = frontier.is_none_or(|f| f > *cap.time());
                         if frontier_progressed {
                             // There's no way to guarantee that "last
                             // frontier + 1" is actually the resume epoch
