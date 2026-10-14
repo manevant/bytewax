@@ -70,11 +70,7 @@ impl Operator {
     }
 
     pub(crate) fn name(&self, py: Python) -> PyResult<String> {
-        if let Ok(name) = self.0.getattr(py, "core_name") {
-            Ok(name.extract(py)?)
-        } else {
-            Ok(self.0.bind(py).get_type().name()?.to_string())
-        }
+        Ok(self.0.bind(py).get_type().name()?.to_string())
     }
 
     pub(crate) fn step_id(&self, py: Python) -> PyResult<StepId> {
@@ -111,8 +107,8 @@ impl Operator {
             .bind(py)
             .getattr(port_name)
             .reraise_with(|| format!("operator did not have MultiPort {port_name:?}"))?
-            .getattr("stream_ids")?
-            .extract::<&PyDict>()?;
-        stream_ids.values().extract()
+            .getattr("stream_ids")?;
+        let stream_ids_dict: Bound<'_, PyDict> = stream_ids.downcast_into()?;
+        stream_ids_dict.values().extract()
     }
 }

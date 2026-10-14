@@ -312,7 +312,8 @@ pub(crate) fn cluster_main(
             timely::WorkerConfig::default(),
             move |worker| {
                 let flow = Python::with_gil(|py| flow.clone_ref(py));
-                let recovery_config = recovery_config.clone();
+                let recovery_config =
+                    Python::with_gil(|py| recovery_config.as_ref().map(|rc| rc.clone_ref(py)));
 
                 unwrap_any!(worker_main(
                     worker,
@@ -338,9 +339,8 @@ pub(crate) fn cluster_main(
             thread::sleep(cooldown);
             // The compiler can't figure out the lifetimes work out.
             #[allow(clippy::redundant_closure)]
-            Python::with_gil(|py| Python::check_signals(py)).map_err(|err| {
+            Python::with_gil(|py| Python::check_signals(py)).inspect_err(|_err| {
                 should_shutdown.store(true, Ordering::Relaxed);
-                err
             })?;
         }
         for maybe_worker_panic in guards.join() {

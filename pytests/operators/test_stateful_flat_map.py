@@ -10,7 +10,7 @@ def test_stateful_map_logic_discard_on_none():
         return None, None
 
     logic = _StatefulFlatMapLogic("test_step", mapper, None)
-    (out, discard) = logic.on_item(1)
+    out, discard = logic.on_item(1)
 
     assert discard == StatefulLogic.DISCARD
 

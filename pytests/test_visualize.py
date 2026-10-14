@@ -372,8 +372,7 @@ def test_to_mermaid_linear():
     s = op.map("add_one", s, lambda x: x + 1)
     op.output("out", s, TestingSink([]))
 
-    assert to_mermaid(flow) == textwrap.dedent(
-        """\
+    assert to_mermaid(flow) == textwrap.dedent("""\
         flowchart TD
         subgraph "test_df (Dataflow)"
         test_df.inp["inp (input)"]
@@ -381,8 +380,7 @@ def test_to_mermaid_linear():
         test_df.inp -- "down → up" --> test_df.add_one
         test_df.out["out (output)"]
         test_df.add_one -- "down → up" --> test_df.out
-        end"""
-    )
+        end""")
 
 
 def test_to_mermaid_nonlinear():
@@ -393,8 +391,7 @@ def test_to_mermaid_nonlinear():
     op.output("out_one", ones, TestingSink([]))
     op.output("out_two", twos, TestingSink([]))
 
-    assert to_mermaid(flow) == textwrap.dedent(
-        """\
+    assert to_mermaid(flow) == textwrap.dedent("""\
         flowchart TD
         subgraph "test_df (Dataflow)"
         test_df.nums["nums (input)"]
@@ -406,8 +403,7 @@ def test_to_mermaid_nonlinear():
         test_df.add_one -- "down → up" --> test_df.out_one
         test_df.out_two["out_two (output)"]
         test_df.add_two -- "down → up" --> test_df.out_two
-        end"""
-    )
+        end""")
 
 
 def test_to_mermaid_multistream_inp():
@@ -417,8 +413,7 @@ def test_to_mermaid_multistream_inp():
     s = op.merge("merge", ones, twos)
     op.output("out", s, TestingSink([]))
 
-    assert to_mermaid(flow) == textwrap.dedent(
-        """\
+    assert to_mermaid(flow) == textwrap.dedent("""\
         flowchart TD
         subgraph "test_df (Dataflow)"
         test_df.ones["ones (input)"]
@@ -428,5 +423,4 @@ def test_to_mermaid_multistream_inp():
         test_df.twos -- "down → ups" --> test_df.merge
         test_df.out["out (output)"]
         test_df.merge -- "down → up" --> test_df.out
-        end"""
-    )
+        end""")

@@ -26,6 +26,8 @@ __all__ = [
     "cli_main",
 ]
 
+from bytewax.dataflow import Dataflow
+
 
 def _locate_dataflow(module_name, dataflow_name):
     """Import a module and try to find a Dataflow within it.
@@ -36,8 +38,6 @@ def _locate_dataflow(module_name, dataflow_name):
 
     This is adapted from Flask's codebase.
     """
-    from bytewax.dataflow import Dataflow
-
     try:
         __import__(module_name)
     except ImportError as ex:

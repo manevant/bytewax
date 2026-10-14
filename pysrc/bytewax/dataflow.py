@@ -514,7 +514,6 @@ def _gen_op_cls(
         namespace=cls_ns,
     )
     cls.__module__ = builder.__module__
-    cls.core_name = builder.__name__
 
     return cls
 
